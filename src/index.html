@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Convert to Podcast - Turn Any Text, PDF, or URL into an AI Podcast</title>
+  <meta name="description" content="Free AI tool to convert PDF, articles, web pages, and text into natural-sounding podcast conversations. No login required.">
+  <link rel="canonical" href="https://converttopodcast.com/">
+  <link rel="stylesheet" href="/src/style.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Convert to Podcast",
+    "url": "https://converttopodcast.com",
+    "applicationCategory": "Multimedia",
+    "operatingSystem": "All",
+    "description": "Convert any text, PDF, or URL into an AI-generated podcast conversation."
+  }
+  </script>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="container">
+      <a href="/" class="logo">🎙️ ConvertToPodcast</a>
+      <div class="nav-links">
+        <a href="/tools/pdf-to-podcast/">PDF to Podcast</a>
+        <a href="/tools/article-to-podcast/">Article to Podcast</a>
+        <a href="/tools/url-to-podcast/">URL to Podcast</a>
+        <a href="/blog/">Blog</a>
+      </div>
+      <button class="hamburger" aria-label="Menu">☰</button>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container">
+      <h1>Turn Anything Into a Podcast</h1>
+      <p class="subtitle">Upload a PDF, paste a URL, or type your text — get a natural two-host AI podcast conversation in seconds. Like NotebookLM, but free and no login.</p>
+    </div>
+  </section>
+
+  <!-- Tool Section -->
+  <section class="tool-section" id="tool">
+    <div class="container">
+      <div class="tool-card">
+        <!-- Input Tabs -->
+        <div class="input-tabs" role="tablist">
+          <button class="tab active" data-tab="url" role="tab" aria-selected="true">🔗 URL</button>
+          <button class="tab" data-tab="text" role="tab" aria-selected="false">📝 Text</button>
+          <button class="tab" data-tab="pdf" role="tab" aria-selected="false">📄 PDF</button>
+        </div>
+
+        <!-- URL Input -->
+        <div class="input-panel active" id="panel-url" role="tabpanel">
+          <input type="url" class="input-field" id="url-input" placeholder="Paste any article URL, blog post, or webpage..." autocomplete="url">
+          <button class="clear-btn" id="clear-url" aria-label="Clear">✕</button>
+        </div>
+
+        <!-- Text Input -->
+        <div class="input-panel" id="panel-text" role="tabpanel">
+          <textarea class="input-field textarea" id="text-input" placeholder="Paste or type your content here... (min 100 characters for best results)" rows="6"></textarea>
+        </div>
+
+        <!-- PDF Input -->
+        <div class="input-panel" id="panel-pdf" role="tabpanel">
+          <div class="upload-zone" id="upload-zone">
+            <div class="upload-icon">📄</div>
+            <p>Drop your PDF here or <span class="upload-link">browse files</span></p>
+            <p class="upload-hint">Max 10MB</p>
+            <input type="file" id="pdf-input" accept=".pdf" hidden>
+          </div>
+          <div class="file-info" id="file-info" style="display:none">
+            <span id="file-name"></span>
+            <button class="clear-btn" id="clear-file">✕</button>
+          </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="settings">
+          <div class="setting-group">
+            <label for="style-select">Podcast Style</label>
+            <select class="select-field" id="style-select">
+              <option value="deep">🎯 Deep Dive — Two experts explain in depth</option>
+              <option value="quick">⚡ Quick Summary — 1-min rapid recap</option>
+              <option value="debate">🎭 Debate — Two perspectives argue the topic</option>
+            </select>
+          </div>
+          <div class="setting-row">
+            <div class="setting-group">
+              <label for="lang-select">Language</label>
+              <select class="select-field" id="lang-select">
+                <option value="en">English</option>
+                <option value="zh">中文</option>
+                <option value="es">Español</option>
+                <option value="ja">日本語</option>
+                <option value="pt">Português</option>
+              </select>
+            </div>
+            <div class="setting-group">
+              <label for="length-select">Length</label>
+              <select class="select-field" id="length-select">
+                <option value="short">Short (~3 min)</option>
+                <option value="medium" selected>Medium (~8 min)</option>
+                <option value="long">Long (~15 min)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Generate Button -->
+        <button class="generate-btn" id="generate-btn">
+          <span class="btn-text">Generate Podcast</span>
+          <span class="btn-loading" style="display:none">
+            <span class="spinner"></span> Generating...
+          </span>
+        </button>
+
+        <!-- Result -->
+        <div class="result-section" id="result-section" style="display:none">
+          <div class="result-header">
+            <h3>Your Podcast is Ready 🎉</h3>
+            <div class="credit-badge" id="credit-badge">Free</div>
+          </div>
+          <div class="audio-player">
+            <audio controls id="audio-player" style="width:100%">
+              Your browser doesn't support audio playback.
+            </audio>
+          </div>
+          <div class="result-actions">
+            <button class="action-btn" id="download-btn">⬇️ Download MP3</button>
+            <button class="action-btn secondary" id="share-btn">🔗 Copy Link</button>
+            <button class="action-btn secondary" id="regenerate-btn">🔄 Regenerate</button>
+          </div>
+          <div class="result-info" id="result-info"></div>
+        </div>
+
+        <!-- Error -->
+        <div class="error-section" id="error-section" style="display:none">
+          <p class="error-text" id="error-text"></p>
+        </div>
+
+        <!-- Credits info -->
+        <div class="credits-info">
+          <p>✨ <strong>Free:</strong> 30 credits/month · <strong>Basic $4.99:</strong> 300 credits · <strong>Pro $9.99:</strong> 1,000 credits · 1 credit = 1 minute</p>
+          <p class="credit-count" id="credit-count">Free plan: <strong>30 credits remaining this month</strong></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it Works -->
+  <section class="how-it-works">
+    <div class="container">
+      <h2>How It Works</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <h3>Add Your Content</h3>
+          <p>Paste a URL, upload a PDF, or type your text. We support articles, research papers, blog posts, and more.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <h3>AI Writes the Script</h3>
+          <p>Our AI analyzes your content and writes a natural conversation between two podcast hosts — like a real show.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <h3>Listen & Download</h3>
+          <p>Get a high-quality AI-generated podcast you can listen to on the go, share, or download as MP3.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Use Cases -->
+  <section class="use-cases">
+    <div class="container">
+      <h2>What Can You Convert?</h2>
+      <div class="cases-grid">
+        <a href="/tools/pdf-to-podcast/" class="case-card">
+          <div class="case-icon">📕</div>
+          <h3>PDF to Podcast</h3>
+          <p>Turn reports, ebooks, and documents into audio you can listen to anywhere.</p>
+        </a>
+        <a href="/tools/article-to-podcast/" class="case-card">
+          <div class="case-icon">📰</div>
+          <h3>Article to Podcast</h3>
+          <p>Convert blog posts and news articles into quick podcast summaries.</p>
+        </a>
+        <a href="/tools/url-to-podcast/" class="case-card">
+          <div class="case-icon">🌐</div>
+          <h3>URL to Podcast</h3>
+          <p>Paste any webpage URL and get a podcast version instantly.</p>
+        </a>
+        <a href="/tools/research-paper-to-podcast/" class="case-card">
+          <div class="case-icon">🔬</div>
+          <h3>Research Paper to Podcast</h3>
+          <p>Understand complex academic papers through conversational explanation.</p>
+        </a>
+        <a href="/tools/notes-to-podcast/" class="case-card">
+          <div class="case-icon">📝</div>
+          <h3>Notes to Podcast</h3>
+          <p>Turn your study notes into audio for passive learning on the go.</p>
+        </a>
+        <a href="/tools/book-to-podcast/" class="case-card">
+          <div class="case-icon">📚</div>
+          <h3>Book to Podcast</h3>
+          <p>Get book summaries as engaging podcast conversations.</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq">
+    <div class="container">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary>Is this like Google NotebookLM?</summary>
+          <p>Yes! Similar to NotebookLM's Audio Overviews, but you don't need a Google account, and you can use any content — URLs, PDFs, or plain text. No login required for free tier.</p>
+        </details>
+        <details class="faq-item">
+          <summary>How many podcasts can I generate for free?</summary>
+          <p>Free plan gives you 30 credits per month (1 credit = 1 minute of generated audio). That's about 15 short podcasts or 3-4 full-length ones. Upgrade to Pro for 1,000 credits/month.</p>
+        </details>
+        <details class="faq-item">
+          <summary>What languages are supported?</summary>
+          <p>Currently English, Chinese, Spanish, Japanese, and Portuguese. More languages coming soon.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Can I download the podcast?</summary>
+          <p>Yes! You can download your generated podcast as an MP3 file. Pro and Ultra plans have high-quality audio with ElevenLabs voices.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Can I use the audio commercially?</summary>
+          <p>Yes, all generated audio on paid plans comes with full commercial rights. Free tier is for personal use only.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <h4>Convert to Podcast</h4>
+          <p>Turn any content into an AI podcast conversation. Free to start.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Tools</h4>
+          <a href="/tools/pdf-to-podcast/">PDF to Podcast</a>
+          <a href="/tools/article-to-podcast/">Article to Podcast</a>
+          <a href="/tools/url-to-podcast/">URL to Podcast</a>
+          <a href="/tools/text-to-podcast/">Text to Podcast</a>
+          <a href="/tools/research-paper-to-podcast/">Research Paper to Podcast</a>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <a href="/privacy/">Privacy Policy</a>
+          <a href="/terms/">Terms of Service</a>
+          <a href="/contact/">Contact</a>
+        </div>
+      </div>
+      <p class="footer-bottom">&copy; 2026 ConvertToPodcast. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="/src/script.js"></script>
+</body>
+</html>
