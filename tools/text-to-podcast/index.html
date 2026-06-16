@@ -3,24 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Convert to Podcast - Turn Any Text, PDF, or URL into an AI Podcast</title>
-  <meta name="description" content="Free AI tool to convert PDF, articles, web pages, and text into natural-sounding podcast conversations. No login required.">
-  <link rel="canonical" href="https://converttopodcast.com/">
+  <title>Text to Podcast - Convert Text to Audio | ConvertToPodcast</title>
+  <meta name="description" content="Free text-to-podcast converter. Paste any text and get a natural AI podcast conversation. Perfect for notes, drafts, and custom content. No login required.">
+  <link rel="canonical" href="https://converttopodcast.com/tools/text-to-podcast/">
   <link rel="stylesheet" href="/src/style.css">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "WebApplication",
-    "name": "Convert to Podcast",
-    "url": "https://converttopodcast.com",
+    "name": "Convert to Podcast - Text to Podcast Converter",
+    "url": "https://converttopodcast.com/tools/text-to-podcast/",
     "applicationCategory": "Multimedia",
     "operatingSystem": "All",
-    "description": "Convert any text, PDF, or URL into an AI-generated podcast conversation."
+    "description": "Free text-to-podcast converter. Paste any text and get a natural AI podcast conversation. Perfect for notes, drafts, and custom content. No login required."
   }
   </script>
 </head>
 <body>
-  <!-- Navigation -->
   <nav class="nav">
     <div class="container">
       <a href="/" class="logo">🎙️ ConvertToPodcast</a>
@@ -34,37 +33,28 @@
     </div>
   </nav>
 
-  <!-- Hero -->
   <section class="hero">
     <div class="container">
-      <h1>Turn Anything Into a Podcast</h1>
-      <p class="subtitle">Upload a PDF, paste a URL, or type your text — get a natural two-host AI podcast conversation in seconds. Like NotebookLM, but free and no login.</p>
+      <h1>Text to Podcast Converter</h1>
+      <p class="subtitle">Type or paste any text and turn it into a dynamic two-host podcast conversation. Your words, your content — just audio format.</p>
     </div>
   </section>
 
-  <!-- Tool Section -->
   <section class="tool-section" id="tool">
     <div class="container">
       <div class="tool-card">
-        <!-- Input Tabs -->
         <div class="input-tabs" role="tablist">
           <button class="tab active" data-tab="url" role="tab" aria-selected="true">🔗 URL</button>
           <button class="tab" data-tab="text" role="tab" aria-selected="false">📝 Text</button>
           <button class="tab" data-tab="pdf" role="tab" aria-selected="false">📄 PDF</button>
         </div>
-
-        <!-- URL Input -->
         <div class="input-panel active" id="panel-url" role="tabpanel">
-          <input type="url" class="input-field" id="url-input" placeholder="Paste any article URL, blog post, or webpage..." autocomplete="url">
+          <input type="url" class="input-field" id="url-input" placeholder="Paste any article URL, blog post, or webpage...">
           <button class="clear-btn" id="clear-url" aria-label="Clear">✕</button>
         </div>
-
-        <!-- Text Input -->
         <div class="input-panel" id="panel-text" role="tabpanel">
           <textarea class="input-field textarea" id="text-input" placeholder="Paste or type your content here... (min 100 characters for best results)" rows="6"></textarea>
         </div>
-
-        <!-- PDF Input -->
         <div class="input-panel" id="panel-pdf" role="tabpanel">
           <div class="upload-zone" id="upload-zone">
             <div class="upload-icon">📄</div>
@@ -77,8 +67,6 @@
             <button class="clear-btn" id="clear-file">✕</button>
           </div>
         </div>
-
-        <!-- Settings -->
         <div class="settings">
           <div class="setting-group">
             <label for="style-select">Podcast Style</label>
@@ -109,16 +97,12 @@
             </div>
           </div>
         </div>
-
-        <!-- Generate Button -->
         <button class="generate-btn" id="generate-btn">
           <span class="btn-text">Generate Podcast</span>
           <span class="btn-loading" style="display:none">
             <span class="spinner"></span> Generating...
           </span>
         </button>
-
-        <!-- Result -->
         <div class="result-section" id="result-section" style="display:none">
           <div class="result-header">
             <h3>Your Podcast is Ready 🎉</h3>
@@ -136,13 +120,9 @@
           </div>
           <div class="result-info" id="result-info"></div>
         </div>
-
-        <!-- Error -->
         <div class="error-section" id="error-section" style="display:none">
           <p class="error-text" id="error-text"></p>
         </div>
-
-        <!-- Credits info -->
         <div class="credits-info">
           <p>✨ <strong>Free:</strong> 30 credits/month · <strong>Basic $4.99:</strong> 300 credits · <strong>Pro $9.99:</strong> 1,000 credits · 1 credit = 1 minute</p>
           <p class="credit-count" id="credit-count">Free plan: <strong>30 credits remaining this month</strong></p>
@@ -151,133 +131,134 @@
     </div>
   </section>
 
-  <!-- How it Works -->
   <section class="how-it-works">
     <div class="container">
-      <h2>How It Works</h2>
+      <h2>How Text to Podcast Converter Works</h2>
       <div class="steps">
         <div class="step">
           <div class="step-num">1</div>
           <h3>Add Your Content</h3>
-          <p>Paste a URL, upload a PDF, or type your text. We support articles, research papers, blog posts, and more.</p>
+          <p>Paste or type your text directly into the editor, choose your preferred style (Deep Dive, Quick Summary, or Debate), select language, and generate. The AI transforms your text into a natural dialogue between two hosts.</p>
         </div>
         <div class="step">
           <div class="step-num">2</div>
           <h3>AI Writes the Script</h3>
-          <p>Our AI analyzes your content and writes a natural conversation between two podcast hosts — like a real show.</p>
+          <p>Our AI analyzes your content and writes a natural conversation between two podcast hosts — explaining, debating, or summarizing your material.</p>
         </div>
         <div class="step">
           <div class="step-num">3</div>
           <h3>Listen & Download</h3>
-          <p>Get a high-quality AI-generated podcast you can listen to on the go, share, or download as MP3.</p>
+          <p>Get a high-quality AI-generated podcast you can listen to on the go, share with others, or download as MP3. Free plan includes 30 minutes monthly.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Use Cases -->
   <section class="use-cases">
     <div class="container">
-      <h2>What Can You Convert?</h2>
+      <h2>More Ways to Convert</h2>
       <div class="cases-grid">
-        <a href="/tools/pdf-to-podcast/" class="case-card">
-          <div class="case-icon">📕</div>
-          <h3>PDF to Podcast</h3>
-          <p>Turn reports, ebooks, and documents into audio you can listen to anywhere.</p>
+        <a href="/tools/text-to-podcast/" class="case-card" style="border-color: var(--accent);">
+          <div class="case-icon">📝</div>
+          <h3>Text to Podcast</h3>
+          <p>Turn any text into a podcast conversation.</p>
         </a>
         <a href="/tools/article-to-podcast/" class="case-card">
           <div class="case-icon">📰</div>
           <h3>Article to Podcast</h3>
-          <p>Convert blog posts and news articles into quick podcast summaries.</p>
-        </a>
-        <a href="/tools/url-to-podcast/" class="case-card">
-          <div class="case-icon">🌐</div>
-          <h3>URL to Podcast</h3>
-          <p>Paste any webpage URL and get a podcast version instantly.</p>
-        </a>
-        <a href="/tools/text-to-podcast/" class="case-card">
-          <div class="case-icon">📝</div>
-          <h3>Text to Podcast</h3>
-          <p>Turn any text into an engaging AI podcast conversation.</p>
-        </a>
-        <a href="/tools/research-paper-to-podcast/" class="case-card">
-          <div class="case-icon">🔬</div>
-          <h3>Research Paper to Podcast</h3>
-          <p>Understand complex academic papers through conversational explanation.</p>
-        </a>
-        <a href="/tools/notes-to-podcast/" class="case-card">
-          <div class="case-icon">📝</div>
-          <h3>Notes to Podcast</h3>
-          <p>Turn your study notes into audio for passive learning on the go.</p>
-        </a>
-        <a href="/tools/book-to-podcast/" class="case-card">
-          <div class="case-icon">📚</div>
-          <h3>Book to Podcast</h3>
-          <p>Get book summaries as engaging podcast conversations.</p>
+          <p>Convert blog posts and news articles into audio.</p>
         </a>
         <a href="/tools/blog-to-podcast/" class="case-card">
           <div class="case-icon">✍️</div>
           <h3>Blog to Podcast</h3>
-          <p>Convert blog posts into podcast episodes for your audience.</p>
+          <p>Convert blog posts into podcast episodes.</p>
         </a>
-        <a href="/tools/news-to-podcast/" class="case-card">
-          <div class="case-icon">📰</div>
-          <h3>News to Podcast</h3>
-          <p>Stay informed with quick audio summaries of news articles.</p>
+        <a href="/tools/book-to-podcast/" class="case-card">
+          <div class="case-icon">📚</div>
+          <h3>Book to Podcast</h3>
+          <p>Get book summaries as podcast conversations.</p>
         </a>
         <a href="/tools/document-to-podcast/" class="case-card">
           <div class="case-icon">📋</div>
           <h3>Document to Podcast</h3>
-          <p>Transform business documents and proposals into audio.</p>
-        </a>
-        <a href="/tools/essay-to-podcast/" class="case-card">
-          <div class="case-icon">📖</div>
-          <h3>Essay to Podcast</h3>
-          <p>Essays and long-form writing, turned into conversations.</p>
+          <p>Business documents and reports to audio.</p>
         </a>
         <a href="/tools/email-to-podcast/" class="case-card">
           <div class="case-icon">📧</div>
           <h3>Email to Podcast</h3>
-          <p>Convert newsletters and email threads into audio recaps.</p>
+          <p>Email newsletters and threads to audio.</p>
         </a>
-        <a href="/tools/transcript-to-podcast/" class="case-card">
-          <div class="case-icon">🎙️</div>
-          <h3>Transcript to Podcast</h3>
-          <p>Meeting transcripts and interview notes to podcast audio.</p>
+        <a href="/tools/essay-to-podcast/" class="case-card">
+          <div class="case-icon">📖</div>
+          <h3>Essay to Podcast</h3>
+          <p>Essays and long-form content to audio.</p>
         </a>
         <a href="/tools/lecture-to-podcast/" class="case-card">
           <div class="case-icon">🎓</div>
           <h3>Lecture to Podcast</h3>
-          <p>Course materials and lectures into audio for exam prep.</p>
+          <p>Course materials and lectures to audio.</p>
+        </a>
+        <a href="/tools/news-to-podcast/" class="case-card">
+          <div class="case-icon">📰</div>
+          <h3>News to Podcast</h3>
+          <p>Stay informed with audio news summaries.</p>
+        </a>
+        <a href="/tools/notes-to-podcast/" class="case-card">
+          <div class="case-icon">📝</div>
+          <h3>Notes to Podcast</h3>
+          <p>Turn study notes into audio for passive learning.</p>
+        </a>
+        <a href="/tools/pdf-to-podcast/" class="case-card">
+          <div class="case-icon">📕</div>
+          <h3>PDF to Podcast</h3>
+          <p>Turn reports, ebooks, and documents into audio.</p>
+        </a>
+        <a href="/tools/research-paper-to-podcast/" class="case-card">
+          <div class="case-icon">🔬</div>
+          <h3>Research Paper to Podcast</h3>
+          <p>Understand academic papers through conversation.</p>
+        </a>
+        <a href="/tools/transcript-to-podcast/" class="case-card">
+          <div class="case-icon">🎙️</div>
+          <h3>Transcript to Podcast</h3>
+          <p>Meeting transcripts and captions to audio.</p>
+        </a>
+        <a href="/tools/url-to-podcast/" class="case-card">
+          <div class="case-icon">🌐</div>
+          <h3>URL to Podcast</h3>
+          <p>Paste any webpage URL and get a podcast.</p>
         </a>
       </div>
     </div>
   </section>
 
-  <!-- FAQ -->
   <section class="faq">
     <div class="container">
-      <h2>Frequently Asked Questions</h2>
+      <h2>Frequently Asked Questions About Text to Podcast Converter</h2>
       <div class="faq-list">
         <details class="faq-item">
-          <summary>Is this like Google NotebookLM?</summary>
-          <p>Yes! Similar to NotebookLM's Audio Overviews, but you don't need a Google account, and you can use any content — URLs, PDFs, or plain text. No login required for free tier.</p>
+          <summary>Is this Text to Podcast Converter tool free?</summary>
+          <p>Yes! Free plan gives you 30 credits per month (1 credit = 1 minute of generated audio). That's about 15 short podcasts or 3-4 full-length ones. No credit card required.</p>
         </details>
         <details class="faq-item">
-          <summary>How many podcasts can I generate for free?</summary>
-          <p>Free plan gives you 30 credits per month (1 credit = 1 minute of generated audio). That's about 15 short podcasts or 3-4 full-length ones. Upgrade to Pro for 1,000 credits/month.</p>
+          <summary>Is there a minimum text length?</summary>
+          <p>Yes, we recommend at least 100 characters for best results. The AI needs enough context to create an engaging conversation. For very short notes, try the Quick Summary style.</p>
         </details>
         <details class="faq-item">
-          <summary>What languages are supported?</summary>
-          <p>Currently English, Chinese, Spanish, Japanese, and Portuguese. More languages coming soon.</p>
+          <summary>Can I use this for creative writing?</summary>
+          <p>Absolutely. Turn your short stories, scripts, or creative pieces into audio format. The Debate style works great for exploring different perspectives on creative work.</p>
+        </details>
+        <details class="faq-item">
+          <summary>What languages are supported for text input?</summary>
+          <p>You can paste text in any language. Our AI supports English, Chinese, Spanish, Japanese, and Portuguese for the podcast output. Other languages use the default English voice.</p>
         </details>
         <details class="faq-item">
           <summary>Can I download the podcast?</summary>
-          <p>Yes! You can download your generated podcast as an MP3 file. Pro and Ultra plans have high-quality audio with ElevenLabs voices.</p>
+          <p>Yes! You can download your generated podcast as an MP3 file. Pro and Ultra plans have high-quality audio with ElevenLabs voices for a more natural listening experience.</p>
         </details>
         <details class="faq-item">
-          <summary>Can I use the audio commercially?</summary>
-          <p>Yes, all generated audio on paid plans comes with full commercial rights. Free tier is for personal use only.</p>
+          <summary>Can I use the generated audio commercially?</summary>
+          <p>Yes, all generated audio on paid plans comes with full commercial rights. Free tier is for personal use only. Upgrade to Basic or Pro for commercial licensing.</p>
         </details>
       </div>
     </div>
@@ -288,7 +269,7 @@
       <div class="footer-grid">
         <div class="footer-col">
           <h4>Convert to Podcast</h4>
-          <p>Turn any content into an AI podcast conversation. Free to start.</p>
+          <p>Turn any content into an AI podcast conversation. Free to start. No login required.</p>
         </div>
         <div class="footer-col">
           <h4>Tools</h4>
@@ -299,10 +280,12 @@
           <a href="/tools/research-paper-to-podcast/">Research Paper to Podcast</a>
         </div>
         <div class="footer-col">
-          <h4>Company</h4>
-          <a href="/privacy/">Privacy Policy</a>
-          <a href="/terms/">Terms of Service</a>
-          <a href="/contact/">Contact</a>
+          <h4>More Tools</h4>
+          <a href="/tools/notes-to-podcast/">Notes to Podcast</a>
+          <a href="/tools/book-to-podcast/">Book to Podcast</a>
+          <a href="/tools/blog-to-podcast/">Blog to Podcast</a>
+          <a href="/tools/news-to-podcast/">News to Podcast</a>
+          <a href="/tools/document-to-podcast/">Document to Podcast</a>
         </div>
       </div>
       <p class="footer-bottom">&copy; 2026 ConvertToPodcast. All rights reserved.</p>

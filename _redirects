@@ -1,13 +1,4 @@
 # Cloudflare Pages Redirects
 /home  /
 /tools  /tools/pdf-to-podcast/
-/tools/pdf-to-podcast  / 301
-/tools/pdf-to-podcast/  / 301
-/tools/article-to-podcast  / 301
-/tools/article-to-podcast/  / 301
-/tools/url-to-podcast  / 301
-/tools/url-to-podcast/  / 301
-/tools/text-to-podcast  / 301
-/tools/text-to-podcast/  / 301
-/blog  / 301
-/blog/  / 301
+/blog  /blog/
