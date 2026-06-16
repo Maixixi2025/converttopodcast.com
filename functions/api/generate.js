@@ -58,7 +58,7 @@ export async function onRequest(context) {
     }
 
     // Trim to max length based on plan
-    const maxLength = length === 'short' ? 3000 : length === 'long' ? 15000 : 8000;
+    const maxLength = input.length === 'short' ? 3000 : input.length === 'long' ? 15000 : 8000;
     const trimmedText = input.text.slice(0, maxLength);
 
     // Generate podcast script
