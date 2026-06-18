@@ -56,6 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let selectedFile = null;
   let currentTab = 'url';
   let currentSession = null; // { user, accessToken, plan, remaining } | null
+  let lastResultData = null; // Latest generation result for share/copy
 
   // ---- Hamburger Menu ----
   hamburger.addEventListener('click', () => navLinks.classList.toggle('open'));
@@ -227,6 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function showResult(data) {
     resultSection.style.display = 'block';
     errorSection.style.display = 'none';
+    lastResultData = data;
 
     const audioSrc = data.audio_url || data.url;
     audioPlayer.src = audioSrc;
@@ -249,13 +251,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ---- Share / Regenerate ----
   shareBtn.addEventListener('click', async () => {
-    const url = audioPlayer.src;
+    const result = lastResultData;
     try {
-      await navigator.clipboard.writeText(url);
+      const title = result?.title || 'Podcast';
+      const dur = result?.duration || '';
+      const credits = result?.credits_used || '';
+      const info = `🎙 ${title} (${dur}s, ${credits} credits) - converttopodcast.com`;
+      await navigator.clipboard.writeText(info);
       shareBtn.textContent = '✅ Copied!';
-      setTimeout(() => { shareBtn.textContent = '🔗 Copy Link'; }, 2000);
+      setTimeout(() => { shareBtn.textContent = '📋 Copy Info'; }, 2000);
     } catch {
-      prompt('Copy this link:', url);
+      shareBtn.textContent = '⚠️ Copy failed';
+      setTimeout(() => { shareBtn.textContent = '📋 Copy Info'; }, 2000);
     }
   });
 

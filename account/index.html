@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My History - ConvertToPodcast</title>
+  <link rel="stylesheet" href="/src/style.css">
+  <style>
+    .history-page { max-width: 900px; margin: 40px auto; padding: 0 20px; }
+    .history-page h1 { font-size: 24px; margin-bottom: 8px; }
+    .history-page .sub { color: var(--muted, #6b7280); margin-bottom: 24px; }
+    
+    .history-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .history-table th { text-align: left; padding: 10px 12px; border-bottom: 2px solid var(--border, #e5e7eb); font-weight: 600; color: var(--muted, #6b7280); font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .history-table td { padding: 12px; border-bottom: 1px solid var(--border, #e5e7eb); }
+    .history-table tr:hover td { background: var(--hover, rgba(0,0,0,0.02)); }
+    
+    .history-empty { text-align: center; padding: 60px 20px; color: var(--muted, #6b7280); }
+    .history-empty .icon { font-size: 48px; margin-bottom: 16px; }
+    .history-empty p { margin: 8px 0; }
+    
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 500; }
+    .badge-zh { background: #ede9fe; color: #5b21b6; }
+    .badge-en { background: #dbeafe; color: #1e40af; }
+
+    .nav-bar { display: flex; align-items: center; justify-content: space-between; max-width: 1200px; margin: 0 auto; padding: 12px 20px; }
+    .nav-bar a { color: var(--text); text-decoration: none; font-weight: 500; }
+    .nav-bar a:hover { opacity: 0.7; }
+
+    .pagination { display: flex; justify-content: center; gap: 8px; margin-top: 24px; }
+    .page-btn { padding: 6px 14px; border: 1px solid var(--border, #e5e7eb); border-radius: 6px; background: var(--bg, #fff); cursor: pointer; font-size: 14px; }
+    .page-btn:hover { background: var(--hover, rgba(0,0,0,0.04)); }
+    .page-btn:disabled { opacity: 0.4; cursor: default; }
+
+    .loading { text-align: center; padding: 60px; color: var(--muted, #6b7280); }
+    .loading .spinner { display: inline-block; width: 24px; height: 24px; border: 3px solid var(--border, #e5e7eb); border-top-color: var(--primary, #6366f1); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 12px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .error-msg { text-align: center; padding: 40px; color: #ef4444; }
+    .error-msg a { color: var(--primary, #6366f1); }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-bar">
+      <a href="/">← Back to Converter</a>
+      <span style="font-weight:600">My History</span>
+      <span id="nav-email" style="font-size:13px;color:var(--muted,#6b7280)"></span>
+    </div>
+  </nav>
+
+  <div class="history-page">
+    <h1>My Generation History</h1>
+    <p class="sub">Your past podcast generations are listed below.</p>
+
+    <div id="loading-state" class="loading">
+      <div class="spinner"></div>
+      <p>Loading your history...</p>
+    </div>
+    <div id="error-state" class="error-msg" style="display:none"></div>
+    <div id="empty-state" class="history-empty" style="display:none">
+      <div class="icon">🎙️</div>
+      <p><strong>No generations yet</strong></p>
+      <p>Convert your first article, URL, or PDF into a podcast!</p>
+      <p><a href="/" style="color:var(--primary,#6366f1);font-weight:500">Start converting →</a></p>
+    </div>
+
+    <div id="table-state" style="display:none">
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Source</th>
+            <th>Style</th>
+            <th>Lang</th>
+            <th>Duration</th>
+            <th>Credits</th>
+          </tr>
+        </thead>
+        <tbody id="history-body"></tbody>
+      </table>
+      <div class="pagination" id="pagination"></div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = 'https://nsdhcmjztwxoywkzmdgh.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_NbtnPnLjMLwpGtiIbmQZZQ_t7rDACxR';
+    
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: { persistSession: true, autoRefreshToken: true, storage: window.localStorage }
+    });
+
+    const PER_PAGE = 20;
+    let currentPage = 0;
+    let totalPages = 0;
+
+    async function loadHistory(page = 0) {
+      const loading = document.getElementById('loading-state');
+      const error = document.getElementById('error-state');
+      const empty = document.getElementById('empty-state');
+      const table = document.getElementById('table-state');
+      const tbody = document.getElementById('history-body');
+      const pagination = document.getElementById('pagination');
+
+      loading.style.display = 'block';
+      error.style.display = 'none';
+      empty.style.display = 'none';
+      table.style.display = 'none';
+
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          loading.style.display = 'none';
+          error.style.display = 'block';
+          error.innerHTML = '🔒 Please <a href="/">sign in</a> to view your history.';
+          return;
+        }
+        document.getElementById('nav-email').textContent = session.user.email;
+
+        // Get total count first
+        const { count } = await supabase
+          .from('usage_log')
+          .select('*', { count: 'exact', head: true });
+
+        totalPages = Math.ceil((count || 0) / PER_PAGE);
+        currentPage = page;
+
+        const from = page * PER_PAGE;
+        const to = from + PER_PAGE - 1;
+
+        const { data, error: qErr } = await supabase
+          .from('usage_log')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .range(from, to);
+
+        loading.style.display = 'none';
+
+        if (qErr) {
+          error.style.display = 'block';
+          error.textContent = 'Error loading history: ' + qErr.message;
+          return;
+        }
+
+        if (!data || data.length === 0) {
+          empty.style.display = 'block';
+          return;
+        }
+
+        table.style.display = 'block';
+
+        tbody.innerHTML = data.map(row => {
+          const date = new Date(row.created_at).toLocaleString('en-US', {
+            month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+          });
+          const langBadge = row.language === 'zh' ? '<span class="badge badge-zh">中文</span>' : '<span class="badge badge-en">EN</span>';
+          const source = (row.source || 'url').replace('url', '🔗 URL').replace('text', '📝 Text').replace('pdf', '📄 PDF');
+          const style = (row.style || 'deep').charAt(0).toUpperCase() + (row.style || 'deep').slice(1);
+          const dur = row.duration ? Math.round(row.duration / 60) + 'm' : '—';
+          return `<tr>
+            <td>${date}</td>
+            <td>${source}</td>
+            <td>${style}</td>
+            <td>${langBadge}</td>
+            <td>${dur}</td>
+            <td>${row.credits}</td>
+          </tr>`;
+        }).join('');
+
+        // Pagination
+        pagination.innerHTML = '';
+        if (totalPages > 1) {
+          const prev = document.createElement('button');
+          prev.className = 'page-btn';
+          prev.textContent = '← Prev';
+          prev.disabled = currentPage === 0;
+          prev.onclick = () => loadHistory(currentPage - 1);
+          pagination.appendChild(prev);
+
+          for (let i = Math.max(0, currentPage - 2); i <= Math.min(totalPages - 1, currentPage + 2); i++) {
+            const btn = document.createElement('button');
+            btn.className = 'page-btn';
+            btn.textContent = i + 1;
+            btn.style.fontWeight = i === currentPage ? '700' : '400';
+            btn.onclick = () => loadHistory(i);
+            pagination.appendChild(btn);
+          }
+
+          const next = document.createElement('button');
+          next.className = 'page-btn';
+          next.textContent = 'Next →';
+          next.disabled = currentPage >= totalPages - 1;
+          next.onclick = () => loadHistory(currentPage + 1);
+          pagination.appendChild(next);
+        }
+      } catch (e) {
+        loading.style.display = 'none';
+        error.style.display = 'block';
+        error.textContent = 'Error: ' + e.message;
+      }
+    }
+
+    loadHistory(0);
+  </script>
+</body>
+</html>
