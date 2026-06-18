@@ -258,13 +258,8 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const url = result?.share_url || result?.audio_url || '';
       if (!url || url.startsWith('data:')) {
-        const err = result?.upload_error;
-        if (err) {
-          shareBtn.textContent = '⚠️ ' + err.slice(0, 40);
-        } else {
-          shareBtn.textContent = '⚠️ No share link';
-        }
-        setTimeout(() => { shareBtn.textContent = '📋 Copy Link'; }, 4000);
+        shareBtn.textContent = '⚠️ Audio not available for sharing';
+        setTimeout(() => { shareBtn.textContent = '📋 Copy Link'; }, 3000);
         return;
       }
       await navigator.clipboard.writeText(url);

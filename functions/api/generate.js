@@ -111,19 +111,15 @@ export async function onRequest(context) {
 
     // Upload audio to Supabase Storage for shareable link
     let shareUrl = '';
-    let uploadDebug = '';
-    // Use the base64 data URL from generateAudio to reconstruct binary
     const dataUrl = audioResult.url;
     if (dataUrl && dataUrl.startsWith('data:') && dataUrl.includes('base64,')) {
       try {
         const base64Data = dataUrl.split('base64,')[1];
-        uploadDebug = `base64 ${base64Data.length} chars, decoding...`;
         const binaryStr = atob(base64Data);
         const bytes = new Uint8Array(binaryStr.length);
         for (let i = 0; i < binaryStr.length; i++) {
           bytes[i] = binaryStr.charCodeAt(i);
         }
-        uploadDebug = `decoded ${bytes.length}b, uploading...`;
         const filename = `podcast-${Date.now()}-${Math.random().toString(36).slice(2, 10)}.mp3`;
         const uploadResp = await fetch(
           `${env.SUPABASE_URL}/storage/v1/object/podcast-audio/${filename}`,
@@ -138,19 +134,12 @@ export async function onRequest(context) {
             body: bytes.buffer,
           }
         );
-        uploadDebug = 'upload status: ' + uploadResp.status;
         if (uploadResp.ok) {
           shareUrl = `${env.SUPABASE_URL}/storage/v1/object/public/podcast-audio/${filename}`;
-          uploadDebug = '';
-        } else {
-          const errBody = await uploadResp.text().catch(() => '?');
-          uploadDebug = 'upload fail: ' + errBody.slice(0, 80);
         }
       } catch (e) {
-        uploadDebug = 'EXCEPTION: ' + e.message;
+        console.error('Upload error:', e.message);
       }
-    } else {
-      uploadDebug = 'url=' + (typeof dataUrl === 'string' ? dataUrl.slice(0, 25) : typeof dataUrl);
     }
 
     // Calculate credits used (1 credit per minute of audio, min 1)
@@ -203,7 +192,6 @@ export async function onRequest(context) {
       title: generateTitle(trimmedText, input.language),
       audio_url: audioResult.url,
       share_url: shareUrl,
-      upload_error: uploadDebug,
       duration: audioResult.duration,
       credits_used: creditsUsed,
       credits_remaining: creditsRemaining,
