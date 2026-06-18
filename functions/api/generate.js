@@ -364,6 +364,7 @@ async function generateAudio(script, language, length, env) {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${serviceKey}`,
+            'apikey': serviceKey,
             'Content-Type': 'audio/mpeg',
           },
           body: audioBuffer,
