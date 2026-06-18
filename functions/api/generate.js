@@ -159,6 +159,7 @@ export async function onRequest(context) {
       title: generateTitle(trimmedText, input.language),
       audio_url: audioResult.url,
       share_url: audioResult.share_url || '',
+      upload_error: audioResult.upload_error || '',
       duration: audioResult.duration,
       credits_used: creditsUsed,
       credits_remaining: creditsRemaining,
@@ -352,20 +353,21 @@ async function generateAudio(script, language, length, env) {
 
   // Upload to Supabase Storage for a shareable URL
   let shareUrl = '';
+  let uploadError = '';
   try {
     const supabaseUrl = env.SUPABASE_URL;
     const serviceKey = env.SUPABASE_SERVICE_KEY;
-    // Supabase env vars are required (set as CF Pages secrets)
     if (supabaseUrl && serviceKey) {
       const filename = `podcast-${Date.now()}-${Math.random().toString(36).slice(2, 10)}.mp3`;
       const uploadResp = await fetch(
         `${supabaseUrl}/storage/v1/object/podcast-audio/${filename}`,
         {
-          method: 'POST',
+          method: 'PUT',
           headers: {
             'Authorization': `Bearer ${serviceKey}`,
             'apikey': serviceKey,
             'Content-Type': 'audio/mpeg',
+            'x-upsert': 'true',
           },
           body: audioBuffer,
         }
@@ -373,18 +375,19 @@ async function generateAudio(script, language, length, env) {
       if (uploadResp.ok) {
         shareUrl = `${supabaseUrl}/storage/v1/object/public/podcast-audio/${filename}`;
       } else {
-        const errText = await uploadResp.text().catch(() => 'upload failed');
-        console.error('Supabase upload failed:', errText);
+        uploadError = `upload ${uploadResp.status}: ${(await uploadResp.text().catch(() => 'unknown')).slice(0, 100)}`;
+        console.error('Supabase upload failed:', uploadError);
       }
     }
   } catch (e) {
+    uploadError = e.message;
     console.error('Supabase upload error:', e.message);
-    // Non-blocking — still return audio as data URL
   }
 
   return {
     url: `data:${mimeType};base64,${base64}`,
     share_url: shareUrl,
+    upload_error: uploadError,
     duration,
   };
 }

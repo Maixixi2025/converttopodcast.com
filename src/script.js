@@ -244,8 +244,11 @@ document.addEventListener('DOMContentLoaded', () => {
     resultInfo.textContent = `${data.title || 'Podcast'} · ${data.duration || ''} · ${data.credits_used || '-'} credits`;
 
     if (data.credits_remaining !== undefined) {
-      // After a successful generation, the user is always signed in (server enforced).
       creditCount.innerHTML = `Your plan: <strong>${data.credits_remaining} credits remaining this month</strong>`;
+    }
+    // Show storage error if any
+    if (data.upload_error) {
+      console.warn('Storage upload error:', data.upload_error);
     }
   }
 
