@@ -111,9 +111,10 @@ export async function onRequest(context) {
 
     // Upload audio to Supabase Storage for shareable link (in main handler scope)
     let shareUrl = '';
+    let uploadDebug = '';
     if (env.SUPABASE_URL && env.SUPABASE_SERVICE_KEY && env.ELEVENLABS_API_KEY) {
       try {
-        // Re-fetch audio from ElevenLabs directly in main handler scope
+        uploadDebug = 'starting ElevenLabs call...';
         const ttsResp = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/7PJTk5zh11ocOACTPzQr`, {
           method: 'POST',
           headers: {
@@ -126,8 +127,10 @@ export async function onRequest(context) {
             voice_settings: { stability: 0.35, similarity_boost: 0.75 },
           }),
         });
+        uploadDebug = 'TTS status: ' + ttsResp.status;
         if (ttsResp.ok) {
           const audioData = await ttsResp.arrayBuffer();
+          uploadDebug = `got audio: ${audioData.byteLength}b, uploading...`;
           const filename = `podcast-${Date.now()}-${Math.random().toString(36).slice(2, 10)}.mp3`;
           const uploadResp = await fetch(
             `${env.SUPABASE_URL}/storage/v1/object/podcast-audio/${filename}`,
@@ -142,13 +145,23 @@ export async function onRequest(context) {
               body: audioData,
             }
           );
+          uploadDebug = 'upload status: ' + uploadResp.status;
           if (uploadResp.ok) {
             shareUrl = `${env.SUPABASE_URL}/storage/v1/object/public/podcast-audio/${filename}`;
+            uploadDebug = '';
+          } else {
+            const errBody = await uploadResp.text().catch(() => '?');
+            uploadDebug = 'upload failed: ' + errBody.slice(0, 80);
           }
+        } else {
+          const errBody = await ttsResp.text().catch(() => '?');
+          uploadDebug = 'TTS failed: ' + errBody.slice(0, 80);
         }
       } catch (e) {
-        console.error('Upload error:', e.message);
+        uploadDebug = 'EXCEPTION: ' + e.message;
       }
+    } else {
+      uploadDebug = 'missing env vars';
     }
 
     // Calculate credits used (1 credit per minute of audio, min 1)
@@ -201,6 +214,7 @@ export async function onRequest(context) {
       title: generateTitle(trimmedText, input.language),
       audio_url: audioResult.url,
       share_url: shareUrl,
+      upload_error: uploadDebug,
       duration: audioResult.duration,
       credits_used: creditsUsed,
       credits_remaining: creditsRemaining,
