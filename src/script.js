@@ -255,14 +255,19 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const title = result?.title || 'Podcast';
       const dur = result?.duration || '';
-      const credits = result?.credits_used || '';
-      const info = `🎙 ${title} (${dur}s, ${credits} credits) - converttopodcast.com`;
+      const shareUrl = result?.share_url;
+      let info;
+      if (shareUrl) {
+        info = `🎙 ${title} (${dur}s) - Listen: ${shareUrl}`;
+      } else {
+        info = `🎙 ${title} (${dur}s) - generated on converttopodcast.com`;
+      }
       await navigator.clipboard.writeText(info);
       shareBtn.textContent = '✅ Copied!';
-      setTimeout(() => { shareBtn.textContent = '📋 Copy Info'; }, 2000);
+      setTimeout(() => { shareBtn.textContent = '📋 Copy Link'; }, 2000);
     } catch {
       shareBtn.textContent = '⚠️ Copy failed';
-      setTimeout(() => { shareBtn.textContent = '📋 Copy Info'; }, 2000);
+      setTimeout(() => { shareBtn.textContent = '📋 Copy Link'; }, 2000);
     }
   });
 

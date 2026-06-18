@@ -158,6 +158,7 @@ export async function onRequest(context) {
       success: true,
       title: generateTitle(trimmedText, input.language),
       audio_url: audioResult.url,
+      share_url: audioResult.share_url || '',
       duration: audioResult.duration,
       credits_used: creditsUsed,
       credits_remaining: creditsRemaining,
@@ -302,13 +303,13 @@ Generate the podcast script in ${getLanguageName(language)}.`;
   }
 }
 
-// --- Audio Generation (ElevenLabs TTS) ---
+// --- Audio Generation (ElevenLabs TTS + Supabase Storage) ---
 
 async function generateAudio(script, language, length, env) {
   const apiKey = env.ELEVENLABS_API_KEY;
   if (!apiKey) {
     return {
-      url: '',
+      url: '', share_url: '',
       duration: length === 'short' ? 180 : length === 'long' ? 900 : 480,
     };
   }
@@ -336,7 +337,7 @@ async function generateAudio(script, language, length, env) {
     const err = await resp.text().catch(() => 'Unknown error');
     console.error('ElevenLabs TTS failed:', err);
     return {
-      url: '',
+      url: '', share_url: '',
       duration: length === 'short' ? 180 : length === 'long' ? 900 : 480,
     };
   }
@@ -349,8 +350,40 @@ async function generateAudio(script, language, length, env) {
   const wordCount = script.split(/\s+/).length;
   const duration = Math.max(30, Math.ceil(wordCount / 2.5));
 
+  // Upload to Supabase Storage for a shareable URL
+  let shareUrl = '';
+  try {
+    const supabaseUrl = env.SUPABASE_URL;
+    const serviceKey = env.SUPABASE_SERVICE_KEY;
+    // Supabase env vars are required (set as CF Pages secrets)
+    if (supabaseUrl && serviceKey) {
+      const filename = `podcast-${Date.now()}-${crypto.randomUUID().slice(0, 8)}.mp3`;
+      const uploadResp = await fetch(
+        `${supabaseUrl}/storage/v1/object/podcast-audio/${filename}`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${serviceKey}`,
+            'Content-Type': 'audio/mpeg',
+          },
+          body: audioBuffer,
+        }
+      );
+      if (uploadResp.ok) {
+        shareUrl = `${supabaseUrl}/storage/v1/object/public/podcast-audio/${filename}`;
+      } else {
+        const errText = await uploadResp.text().catch(() => 'upload failed');
+        console.error('Supabase upload failed:', errText);
+      }
+    }
+  } catch (e) {
+    console.error('Supabase upload error:', e.message);
+    // Non-blocking — still return audio as data URL
+  }
+
   return {
     url: `data:${mimeType};base64,${base64}`,
+    share_url: shareUrl,
     duration,
   };
 }
