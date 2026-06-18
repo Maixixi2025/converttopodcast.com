@@ -357,7 +357,7 @@ async function generateAudio(script, language, length, env) {
     const serviceKey = env.SUPABASE_SERVICE_KEY;
     // Supabase env vars are required (set as CF Pages secrets)
     if (supabaseUrl && serviceKey) {
-      const filename = `podcast-${Date.now()}-${crypto.randomUUID().slice(0, 8)}.mp3`;
+      const filename = `podcast-${Date.now()}-${Math.random().toString(36).slice(2, 10)}.mp3`;
       const uploadResp = await fetch(
         `${supabaseUrl}/storage/v1/object/podcast-audio/${filename}`,
         {
