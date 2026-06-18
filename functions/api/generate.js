@@ -109,6 +109,32 @@ export async function onRequest(context) {
     // Generate audio using TTS
     const audioResult = await generateAudio(script, input.language, input.length, env);
 
+    // Upload audio to Supabase Storage for shareable link (in main handler scope)
+    let shareUrl = '';
+    if (audioResult.audioBuffer && env.SUPABASE_URL && env.SUPABASE_SERVICE_KEY) {
+      try {
+        const filename = `podcast-${Date.now()}-${Math.random().toString(36).slice(2, 10)}.mp3`;
+        const uploadResp = await fetch(
+          `${env.SUPABASE_URL}/storage/v1/object/podcast-audio/${filename}`,
+          {
+            method: 'PUT',
+            headers: {
+              'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`,
+              'apikey': env.SUPABASE_SERVICE_KEY,
+              'Content-Type': 'audio/mpeg',
+              'x-upsert': 'true',
+            },
+            body: audioResult.audioBuffer,
+          }
+        );
+        if (uploadResp.ok) {
+          shareUrl = `${env.SUPABASE_URL}/storage/v1/object/public/podcast-audio/${filename}`;
+        }
+      } catch (e) {
+        console.error('Storage upload error:', e.message);
+      }
+    }
+
     // Calculate credits used (1 credit per minute of audio, min 1)
     const duration = audioResult.duration || 60;
     const creditsUsed = Math.max(1, Math.ceil(duration / 60));
@@ -158,8 +184,7 @@ export async function onRequest(context) {
       success: true,
       title: generateTitle(trimmedText, input.language),
       audio_url: audioResult.url,
-      share_url: audioResult.share_url || '',
-      upload_error: audioResult.upload_error || '',
+      share_url: shareUrl,
       duration: audioResult.duration,
       credits_used: creditsUsed,
       credits_remaining: creditsRemaining,
@@ -304,16 +329,13 @@ Generate the podcast script in ${getLanguageName(language)}.`;
   }
 }
 
-// --- Audio Generation (ElevenLabs TTS + Supabase Storage) ---
+// --- Audio Generation (ElevenLabs TTS) ---
 
 async function generateAudio(script, language, length, env) {
-  // DEBUG: check env vars immediately
-  let debugInfo = `env types: url=${typeof env.SUPABASE_URL} key=${typeof env.SUPABASE_SERVICE_KEY}`;
-
   const apiKey = env.ELEVENLABS_API_KEY;
   if (!apiKey) {
     return {
-      url: '', share_url: '', upload_error: debugInfo + ' no apiKey',
+      url: '', share_url: '',
       duration: length === 'short' ? 180 : length === 'long' ? 900 : 480,
     };
   }
@@ -339,7 +361,6 @@ async function generateAudio(script, language, length, env) {
 
   if (!resp.ok) {
     const err = await resp.text().catch(() => 'Unknown error');
-    console.error('ElevenLabs TTS failed:', err);
     return {
       url: '', share_url: '',
       duration: length === 'short' ? 180 : length === 'long' ? 900 : 480,
@@ -354,46 +375,10 @@ async function generateAudio(script, language, length, env) {
   const wordCount = script.split(/\s+/).length;
   const duration = Math.max(30, Math.ceil(wordCount / 2.5));
 
-  // Upload to Supabase Storage for a shareable URL
-  let shareUrl = '';
-  let uploadError = '';
-  try {
-    const supabaseUrl = env.SUPABASE_URL;
-    const serviceKey = env.SUPABASE_SERVICE_KEY;
-    uploadError = `env check: url=${typeof supabaseUrl} key=${typeof serviceKey}`;
-    if (supabaseUrl && serviceKey) {
-      uploadError = `uploading ${audioBuffer.byteLength}b...`;
-      const filename = `podcast-${Date.now()}-${Math.random().toString(36).slice(2, 10)}.mp3`;
-      // Use the response directly as body stream instead of arrayBuffer
-      const uploadResp = await fetch(
-        `${supabaseUrl}/storage/v1/object/podcast-audio/${filename}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Authorization': `Bearer ${serviceKey}`,
-            'apikey': serviceKey,
-            'Content-Type': 'audio/mpeg',
-            'x-upsert': 'true',
-          },
-          body: audioBuffer,
-        }
-      );
-      uploadError = `resp ${uploadResp.status}`;
-      if (uploadResp.ok) {
-        shareUrl = `${supabaseUrl}/storage/v1/object/public/podcast-audio/${filename}`;
-        uploadError = '';
-      } else {
-        uploadError = `upload ${uploadResp.status}: ${(await uploadResp.text().catch(() => 'unknown')).slice(0, 100)}`;
-      }
-    }
-  } catch (e) {
-    uploadError = `EXCEPTION: ${e.message}`;
-  }
-
   return {
     url: `data:${mimeType};base64,${base64}`,
-    share_url: shareUrl,
-    upload_error: uploadError || debugInfo,
+    share_url: '',  // Main handler will try to upload
+    audioBuffer: audioBuffer,
     duration,
   };
 }
