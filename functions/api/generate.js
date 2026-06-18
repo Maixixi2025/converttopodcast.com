@@ -111,27 +111,43 @@ export async function onRequest(context) {
 
     // Upload audio to Supabase Storage for shareable link (in main handler scope)
     let shareUrl = '';
-    if (audioResult.audioBuffer && env.SUPABASE_URL && env.SUPABASE_SERVICE_KEY) {
+    if (env.SUPABASE_URL && env.SUPABASE_SERVICE_KEY && env.ELEVENLABS_API_KEY) {
       try {
-        const filename = `podcast-${Date.now()}-${Math.random().toString(36).slice(2, 10)}.mp3`;
-        const uploadResp = await fetch(
-          `${env.SUPABASE_URL}/storage/v1/object/podcast-audio/${filename}`,
-          {
-            method: 'PUT',
-            headers: {
-              'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`,
-              'apikey': env.SUPABASE_SERVICE_KEY,
-              'Content-Type': 'audio/mpeg',
-              'x-upsert': 'true',
-            },
-            body: audioResult.audioBuffer,
+        // Re-fetch audio from ElevenLabs directly in main handler scope
+        const ttsResp = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/7PJTk5zh11ocOACTPzQr`, {
+          method: 'POST',
+          headers: {
+            'xi-api-key': env.ELEVENLABS_API_KEY,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            text: script,
+            model_id: 'eleven_multilingual_v2',
+            voice_settings: { stability: 0.35, similarity_boost: 0.75 },
+          }),
+        });
+        if (ttsResp.ok) {
+          const audioData = await ttsResp.arrayBuffer();
+          const filename = `podcast-${Date.now()}-${Math.random().toString(36).slice(2, 10)}.mp3`;
+          const uploadResp = await fetch(
+            `${env.SUPABASE_URL}/storage/v1/object/podcast-audio/${filename}`,
+            {
+              method: 'PUT',
+              headers: {
+                'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`,
+                'apikey': env.SUPABASE_SERVICE_KEY,
+                'Content-Type': 'audio/mpeg',
+                'x-upsert': 'true',
+              },
+              body: audioData,
+            }
+          );
+          if (uploadResp.ok) {
+            shareUrl = `${env.SUPABASE_URL}/storage/v1/object/public/podcast-audio/${filename}`;
           }
-        );
-        if (uploadResp.ok) {
-          shareUrl = `${env.SUPABASE_URL}/storage/v1/object/public/podcast-audio/${filename}`;
         }
       } catch (e) {
-        console.error('Storage upload error:', e.message);
+        console.error('Upload error:', e.message);
       }
     }
 
