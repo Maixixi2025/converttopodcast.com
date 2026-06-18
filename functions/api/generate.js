@@ -357,8 +357,11 @@ async function generateAudio(script, language, length, env) {
   try {
     const supabaseUrl = env.SUPABASE_URL;
     const serviceKey = env.SUPABASE_SERVICE_KEY;
+    uploadError = `env check: url=${typeof supabaseUrl} key=${typeof serviceKey}`;
     if (supabaseUrl && serviceKey) {
+      uploadError = `uploading ${audioBuffer.byteLength}b...`;
       const filename = `podcast-${Date.now()}-${Math.random().toString(36).slice(2, 10)}.mp3`;
+      // Use the response directly as body stream instead of arrayBuffer
       const uploadResp = await fetch(
         `${supabaseUrl}/storage/v1/object/podcast-audio/${filename}`,
         {
@@ -372,16 +375,16 @@ async function generateAudio(script, language, length, env) {
           body: audioBuffer,
         }
       );
+      uploadError = `resp ${uploadResp.status}`;
       if (uploadResp.ok) {
         shareUrl = `${supabaseUrl}/storage/v1/object/public/podcast-audio/${filename}`;
+        uploadError = '';
       } else {
         uploadError = `upload ${uploadResp.status}: ${(await uploadResp.text().catch(() => 'unknown')).slice(0, 100)}`;
-        console.error('Supabase upload failed:', uploadError);
       }
     }
   } catch (e) {
-    uploadError = e.message;
-    console.error('Supabase upload error:', e.message);
+    uploadError = `EXCEPTION: ${e.message}`;
   }
 
   return {
