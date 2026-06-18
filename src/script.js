@@ -253,16 +253,13 @@ document.addEventListener('DOMContentLoaded', () => {
   shareBtn.addEventListener('click', async () => {
     const result = lastResultData;
     try {
-      const title = result?.title || 'Podcast';
-      const dur = result?.duration || '';
-      const shareUrl = result?.share_url;
-      let info;
-      if (shareUrl) {
-        info = `🎙 ${title} (${dur}s) - Listen: ${shareUrl}`;
-      } else {
-        info = `🎙 ${title} (${dur}s) - generated on converttopodcast.com`;
+      const url = result?.share_url || result?.audio_url || '';
+      if (!url || url.startsWith('data:')) {
+        shareBtn.textContent = '⚠️ No share link';
+        setTimeout(() => { shareBtn.textContent = '📋 Copy Link'; }, 2000);
+        return;
       }
-      await navigator.clipboard.writeText(info);
+      await navigator.clipboard.writeText(url);
       shareBtn.textContent = '✅ Copied!';
       setTimeout(() => { shareBtn.textContent = '📋 Copy Link'; }, 2000);
     } catch {
