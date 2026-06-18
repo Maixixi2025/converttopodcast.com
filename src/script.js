@@ -1,7 +1,8 @@
-// ConvertToPodcast - Frontend Script
+// converttopodcast.com — Frontend Script
+// Includes: tab/upload/generate UX + Supabase auth + credits display
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Elements
+  // ---- Elements ----
   const tabs = document.querySelectorAll('.tab');
   const panels = {
     url: document.getElementById('panel-url'),
@@ -34,13 +35,32 @@ document.addEventListener('DOMContentLoaded', () => {
   const hamburger = document.querySelector('.hamburger');
   const navLinks = document.querySelector('.nav-links');
 
+  // Auth nav elements
+  const navSignin = document.getElementById('nav-signin');
+  const navAccount = document.getElementById('nav-account');
+  const navAccountEmail = document.getElementById('nav-account-email');
+  const navAccountMenu = document.getElementById('nav-account-menu');
+  const navSignout = document.getElementById('nav-signout');
+  const navUpgrade = document.getElementById('nav-upgrade');
+  const navCreditPill = document.getElementById('nav-credit-pill');
+  const navCreditNum = document.getElementById('nav-credit-num');
+
+  // Auth modal elements
+  const authModal = document.getElementById('auth-modal');
+  const authModalClose = document.getElementById('auth-modal-close');
+  const oauthGoogle = document.getElementById('oauth-google');
+  const emailForm = document.getElementById('email-form');
+  const authEmail = document.getElementById('auth-email');
+  const emailFormHint = document.getElementById('email-form-hint');
+
   let selectedFile = null;
   let currentTab = 'url';
+  let currentSession = null; // { user, accessToken, plan, remaining } | null
 
-  // Hamburger Menu
+  // ---- Hamburger Menu ----
   hamburger.addEventListener('click', () => navLinks.classList.toggle('open'));
 
-  // Tab Switching
+  // ---- Tab Switching ----
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
       tabs.forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
@@ -52,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // URL Input: show/hide clear button
+  // ---- URL Input ----
   urlInput.addEventListener('input', () => {
     clearUrl.style.display = urlInput.value ? 'block' : 'none';
   });
@@ -61,12 +81,13 @@ document.addEventListener('DOMContentLoaded', () => {
     clearUrl.style.display = 'none';
   });
 
-  // PDF Upload
+  // ---- PDF Upload ----
   uploadZone.addEventListener('click', () => pdfInput.click());
   uploadZone.addEventListener('dragover', (e) => {
     e.preventDefault();
     uploadZone.classList.add('dragover');
   });
+  uploadZone.addEventListener('dragover', () => uploadZone.classList.add('dragover'));
   uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
   uploadZone.addEventListener('drop', (e) => {
     e.preventDefault();
@@ -95,10 +116,18 @@ document.addEventListener('DOMContentLoaded', () => {
     uploadZone.style.display = 'block';
   });
 
-  // Generate Podcast
+  // ---- Generate Podcast ----
   generateBtn.addEventListener('click', generatePodcast);
 
   async function generatePodcast() {
+    // Auth gate — anonymous usage disabled (2026-06-17).
+    // If not signed in, open the auth modal and abort.
+    if (!currentSession?.accessToken) {
+      openAuthModal();
+      showError('Please sign in to generate podcasts. It only takes a second.');
+      return;
+    }
+
     // Validate input
     let content;
     if (currentTab === 'url') {
@@ -126,7 +155,6 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Show loading
     setLoading(true);
     hideError();
     resultSection.style.display = 'none';
@@ -134,21 +162,26 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       let response;
 
+      // Build headers — always attach Bearer token if signed in
+      const headers = currentSession?.accessToken
+        ? { 'Authorization': `Bearer ${currentSession.accessToken}` }
+        : {};
+
       if (content.type === 'pdf') {
         const formData = new FormData();
         formData.append('file', content.value);
         formData.append('style', styleSelect.value);
         formData.append('language', langSelect.value);
         formData.append('length', lengthSelect.value);
-
         response = await fetch('/api/generate', {
           method: 'POST',
+          headers,  // FormData sets Content-Type itself
           body: formData,
         });
       } else {
         response = await fetch('/api/generate', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { ...headers, 'Content-Type': 'application/json' },
           body: JSON.stringify({
             source: content.type,
             content: content.value,
@@ -161,11 +194,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const data = await response.json();
 
+      if (response.status === 401 && (data.code === 'auth_required' || data.code === 'auth_invalid')) {
+        // Session missing/expired — kick user back to auth modal
+        showError(data.message || 'Please sign in to continue.');
+        openAuthModal();
+        return;
+      }
+
+      if (response.status === 402) {
+        // Insufficient credits — show CTA to upgrade
+        showError(
+          (data.error || 'Insufficient credits.') +
+          ' Upgrade your plan for more credits.'
+        );
+        return;
+      }
+
       if (!response.ok) {
         throw new Error(data.error || 'Generation failed. Please try again.');
       }
 
       showResult(data);
+      // Refresh credit display after a successful generation
+      await refreshAndRenderCredits();
     } catch (err) {
       showError(err.message);
     } finally {
@@ -177,12 +228,10 @@ document.addEventListener('DOMContentLoaded', () => {
     resultSection.style.display = 'block';
     errorSection.style.display = 'none';
 
-    // Update audio source
     const audioSrc = data.audio_url || data.url;
     audioPlayer.src = audioSrc;
     audioPlayer.load();
 
-    // Update download link
     downloadBtn.onclick = () => {
       const a = document.createElement('a');
       a.href = audioSrc;
@@ -190,16 +239,15 @@ document.addEventListener('DOMContentLoaded', () => {
       a.click();
     };
 
-    // Update info
     resultInfo.textContent = `${data.title || 'Podcast'} · ${data.duration || ''} · ${data.credits_used || '-'} credits`;
 
-    // Update credit count
     if (data.credits_remaining !== undefined) {
-      creditCount.innerHTML = `Free plan: <strong>${data.credits_remaining} credits remaining this month</strong>`;
+      // After a successful generation, the user is always signed in (server enforced).
+      creditCount.innerHTML = `Your plan: <strong>${data.credits_remaining} credits remaining this month</strong>`;
     }
   }
 
-  // Share URL
+  // ---- Share / Regenerate ----
   shareBtn.addEventListener('click', async () => {
     const url = audioPlayer.src;
     try {
@@ -211,13 +259,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Regenerate
   regenerateBtn.addEventListener('click', () => {
     resultSection.style.display = 'none';
     window.scrollTo({ top: document.querySelector('.tool-card').offsetTop - 80, behavior: 'smooth' });
   });
 
-  // Helpers
+  // ---- Helpers ----
   function setLoading(loading) {
     generateBtn.disabled = loading;
     btnText.style.display = loading ? 'none' : 'inline';
@@ -241,5 +288,122 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch {
       return false;
     }
+  }
+
+  // ---- Auth UI ----
+  function openAuthModal() {
+    authModal.style.display = 'flex';
+    emailFormHint.textContent = '';
+    authEmail.value = '';
+  }
+  function closeAuthModal() {
+    authModal.style.display = 'none';
+  }
+
+  navSignin.addEventListener('click', openAuthModal);
+  authModalClose.addEventListener('click', closeAuthModal);
+  authModal.addEventListener('click', (e) => {
+    if (e.target === authModal) closeAuthModal();
+  });
+
+  oauthGoogle.addEventListener('click', async () => {
+    try {
+      await window.CTP.auth.signInWithGoogle();
+    } catch (e) {
+      emailFormHint.textContent = 'Google sign-in failed: ' + e.message;
+    }
+  });
+
+  emailForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = authEmail.value.trim();
+    if (!email) return;
+    emailFormHint.textContent = 'Sending magic link…';
+    try {
+      const r = await window.CTP.auth.signInWithEmail(email);
+      emailFormHint.textContent = r.message;
+      emailFormHint.style.color = '#10b981';
+    } catch (e) {
+      emailFormHint.textContent = 'Error: ' + e.message;
+      emailFormHint.style.color = '#ef4444';
+    }
+  });
+
+  navAccount.addEventListener('click', (e) => {
+    e.stopPropagation();
+    navAccountMenu.style.display =
+      navAccountMenu.style.display === 'none' ? 'block' : 'none';
+  });
+  document.addEventListener('click', () => {
+    navAccountMenu.style.display = 'none';
+  });
+
+  navSignout.addEventListener('click', async (e) => {
+    e.preventDefault();
+    try {
+      await window.CTP.auth.signOut();
+    } catch (err) {
+      console.error(err);
+    }
+  });
+
+  navUpgrade.addEventListener('click', (e) => {
+    e.preventDefault();
+    window.location.href = '/pricing/'; // create this page later
+  });
+
+  // ---- Session / credits rendering ----
+  function renderAuthState() {
+    if (currentSession && currentSession.user) {
+      const email = currentSession.user.email || 'Account';
+      navSignin.style.display = 'none';
+      navAccount.style.display = 'inline-flex';
+      navAccountEmail.textContent = email.split('@')[0];
+      navCreditPill.style.display = 'inline-flex';
+      const remaining = currentSession.remaining ?? 30;
+      navCreditNum.textContent = remaining;
+      creditCount.innerHTML = `Your plan: <strong>${remaining} credits remaining this month</strong>`;
+    } else {
+      navSignin.style.display = 'inline-flex';
+      navAccount.style.display = 'none';
+      navCreditPill.style.display = 'none';
+      // Anonymous state — invite to sign up so they can start using the tool
+      creditCount.innerHTML = `<a href="#" id="credit-cta-inline">Sign up free</a> to get <strong>30 credits/month</strong>. 1 credit = 1 minute of audio.`;
+      // Wire the inline CTA to open the auth modal
+      const cta = document.getElementById('credit-cta-inline');
+      if (cta) cta.addEventListener('click', (e) => { e.preventDefault(); openAuthModal(); });
+    }
+  }
+
+  async function refreshAndRenderCredits() {
+    if (!window.CTP) return;
+    try {
+      currentSession = await window.CTP.auth.getFullSession();
+    } catch (e) {
+      console.warn('getFullSession failed', e);
+    }
+    renderAuthState();
+  }
+
+  // ---- Init: wait for supabase-js, then wire up auth listener ----
+  if (window.CTP && window.CTP.auth) {
+    // Wait for supabase-js to finish loading (CDN script), THEN pull session
+    // and register the auth-change listener. detectSessionInUrl needs the
+    // client fully constructed to parse #access_token from the OAuth callback.
+    window.CTP.supabase.createClient().then(() => {
+      refreshAndRenderCredits();
+      window.CTP.auth.onAuthChange((session) => {
+        refreshAndRenderCredits();
+        if (session) closeAuthModal();
+      });
+    });
+
+    // Wire the static "Sign up free" CTA in the tool card (only present when
+    // server-rendered HTML showed the anonymous state, before renderAuthState runs)
+    const cta = document.getElementById('credit-cta');
+    if (cta) cta.addEventListener('click', (e) => { e.preventDefault(); openAuthModal(); });
+  } else {
+    // Supabase env not configured — show anonymous state
+    renderAuthState();
   }
 });

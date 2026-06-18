@@ -23,6 +23,48 @@ export async function onRequest(context) {
   try {
     const contentType = request.headers.get('Content-Type') || '';
 
+    // Require authenticated user — anonymous usage is disabled (2026-06-17).
+    // Users must sign up / log in (Supabase Auth) to use the converter.
+    const authHeader = request.headers.get('Authorization') || '';
+    const accessToken = authHeader.replace(/^Bearer\s+/i, '').trim();
+
+    if (!accessToken) {
+      return new Response(JSON.stringify({
+        error: 'Authentication required',
+        code: 'auth_required',
+        message: 'Please sign up or log in to use the converter.',
+      }), { headers, status: 401 });
+    }
+
+    if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_KEY) {
+      return new Response(JSON.stringify({
+        error: 'Server misconfigured (missing Supabase env vars)',
+      }), { headers, status: 500 });
+    }
+
+    let userId = null;
+    try {
+      const userResp = await fetch(`${env.SUPABASE_URL}/auth/v1/user`, {
+        headers: {
+          'apikey': env.SUPABASE_SERVICE_KEY,
+          'Authorization': `Bearer ${accessToken}`,
+        },
+      });
+      if (!userResp.ok) {
+        return new Response(JSON.stringify({
+          error: 'Invalid or expired session',
+          code: 'auth_invalid',
+        }), { headers, status: 401 });
+      }
+      const u = await userResp.json();
+      userId = u.id;
+    } catch (e) {
+      return new Response(JSON.stringify({
+        error: 'Auth verification failed',
+        details: e.message,
+      }), { headers, status: 401 });
+    }
+
     let input;
 
     if (contentType.includes('multipart/form-data')) {
@@ -67,13 +109,58 @@ export async function onRequest(context) {
     // Generate audio using TTS
     const audioResult = await generateAudio(script, input.language, input.length, env);
 
+    // Calculate credits used (1 credit per minute of audio, min 1)
+    const duration = audioResult.duration || 60;
+    const creditsUsed = Math.max(1, Math.ceil(duration / 60));
+
+    // Consume credits from Supabase (userId is guaranteed non-null by auth gate above)
+    const consumeResp = await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/consume_credit`, {
+      method: 'POST',
+      headers: {
+        'apikey': env.SUPABASE_SERVICE_KEY,
+        'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        p_user_id: userId,
+        p_credits: creditsUsed,
+        p_source: input.source,
+        p_style: input.style,
+        p_language: input.language,
+        p_length: input.length,
+        p_duration: duration,
+      }),
+    });
+    if (!consumeResp.ok) {
+      const err = await consumeResp.json().catch(() => ({}));
+      return new Response(JSON.stringify({
+        error: 'Credit check failed',
+        details: err,
+      }), { headers, status: 500 });
+    }
+    const result = await consumeResp.json();
+    if (!result || result.length === 0) {
+      return new Response(JSON.stringify({
+        error: 'Credit check returned no result',
+      }), { headers, status: 500 });
+    }
+    const r = result[0];
+    if (!r.ok) {
+      return new Response(JSON.stringify({
+        error: r.message || 'Insufficient credits',
+        credits_remaining: r.remaining,
+        code: r.message === 'Insufficient credits' ? 'no_credits' : 'credit_error',
+      }), { headers, status: 402 });
+    }
+    const creditsRemaining = r.remaining;
+
     return new Response(JSON.stringify({
       success: true,
       title: generateTitle(trimmedText, input.language),
       audio_url: audioResult.url,
       duration: audioResult.duration,
-      credits_used: Math.ceil(audioResult.duration / 60) || 1,
-      credits_remaining: 29,
+      credits_used: creditsUsed,
+      credits_remaining: creditsRemaining,
     }), { headers, status: 200 });
 
   } catch (err) {
@@ -215,18 +302,67 @@ Generate the podcast script in ${getLanguageName(language)}.`;
   }
 }
 
-// --- Audio Generation ---
+// --- Audio Generation (ElevenLabs TTS) ---
 
 async function generateAudio(script, language, length, env) {
-  // Parse script into dialogue segments
-  const segments = parseScript(script);
+  const apiKey = env.ELEVENLABS_API_KEY;
+  if (!apiKey) {
+    return {
+      url: '',
+      duration: length === 'short' ? 180 : length === 'long' ? 900 : 480,
+    };
+  }
 
-  // For demo purposes, return a placeholder
-  // In production, this would call Edge TTS / OpenAI TTS for each segment
+  // Custom voice created in ElevenLabs Voice Design
+  const voiceId = '7PJTk5zh11ocOACTPzQr';
+
+  const resp = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+    method: 'POST',
+    headers: {
+      'xi-api-key': apiKey,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      text: script,
+      model_id: 'eleven_multilingual_v2',
+      voice_settings: {
+        stability: 0.35,
+        similarity_boost: 0.75,
+      },
+    }),
+  });
+
+  if (!resp.ok) {
+    const err = await resp.text().catch(() => 'Unknown error');
+    console.error('ElevenLabs TTS failed:', err);
+    return {
+      url: '',
+      duration: length === 'short' ? 180 : length === 'long' ? 900 : 480,
+    };
+  }
+
+  const audioBuffer = await resp.arrayBuffer();
+  const base64 = arrayBufferToBase64(audioBuffer);
+  const mimeType = resp.headers.get('content-type') || 'audio/mpeg';
+
+  // Estimate duration: ~2.5 words/sec speaking rate
+  const wordCount = script.split(/\s+/).length;
+  const duration = Math.max(30, Math.ceil(wordCount / 2.5));
+
   return {
-    url: '', // Will be populated when TTS is connected
-    duration: length === 'short' ? 180 : length === 'long' ? 900 : 480,
+    url: `data:${mimeType};base64,${base64}`,
+    duration,
   };
+}
+
+function arrayBufferToBase64(buffer) {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  const chunk = 8192;
+  for (let i = 0; i < bytes.length; i += chunk) {
+    binary += String.fromCharCode(...bytes.slice(i, i + chunk));
+  }
+  return btoa(binary);
 }
 
 function parseScript(script) {

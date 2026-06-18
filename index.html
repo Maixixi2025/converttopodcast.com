@@ -4,9 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Convert to Podcast - Turn Any Text, PDF, or URL into an AI Podcast</title>
-  <meta name="description" content="Free AI tool to convert PDF, articles, web pages, and text into natural-sounding podcast conversations. No login required.">
+  <meta name="description" content="AI tool to convert PDF, articles, web pages, and text into natural-sounding podcast conversations. Sign up free to get 30 credits/month.">
   <link rel="canonical" href="https://converttopodcast.com/">
   <link rel="stylesheet" href="/src/style.css">
+
+  <!-- Supabase env (publishable key is safe in browser) -->
+  <script>
+    window.SUPABASE_URL = 'https://nsdhcmjztwxoywkzmdgh.supabase.co';
+    window.SUPABASE_ANON_KEY = 'sb_publishable_NbtnPnLjMLwpGtiIbmQZZQ_t7rDACxR';
+  </script>
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -30,15 +36,50 @@
         <a href="/tools/url-to-podcast/">URL to Podcast</a>
         <a href="/blog/">Blog</a>
       </div>
+      <div class="nav-auth">
+        <span class="credit-pill" id="nav-credit-pill" style="display:none">⚡ <span id="nav-credit-num">30</span></span>
+        <button class="nav-btn nav-btn-primary" id="nav-signin">Sign in</button>
+        <button class="nav-btn nav-btn-account" id="nav-account" style="display:none">
+          <span id="nav-account-email"></span>
+          <span class="nav-account-caret">▾</span>
+        </button>
+        <div class="nav-account-menu" id="nav-account-menu" style="display:none">
+          <a href="#" id="nav-upgrade">Upgrade plan</a>
+          <a href="#" id="nav-signout">Sign out</a>
+        </div>
+      </div>
       <button class="hamburger" aria-label="Menu">☰</button>
     </div>
   </nav>
+
+  <!-- Sign-in modal -->
+  <div class="modal-backdrop" id="auth-modal" style="display:none">
+    <div class="modal">
+      <button class="modal-close" id="auth-modal-close" aria-label="Close">✕</button>
+      <h2>Sign in to ConvertToPodcast</h2>
+      <p class="modal-sub">Sign in to track your credits and unlock higher limits.</p>
+
+      <button class="oauth-btn oauth-google" id="oauth-google">
+        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.71H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
+        Continue with Google
+      </button>
+
+      <div class="divider"><span>or</span></div>
+
+      <form class="email-form" id="email-form">
+        <label for="auth-email">Email address</label>
+        <input type="email" id="auth-email" placeholder="you@example.com" required>
+        <button type="submit" class="nav-btn nav-btn-primary nav-btn-block">Send magic link</button>
+        <p class="form-hint" id="email-form-hint"></p>
+      </form>
+    </div>
+  </div>
 
   <!-- Hero -->
   <section class="hero">
     <div class="container">
       <h1>Turn Anything Into a Podcast</h1>
-      <p class="subtitle">Upload a PDF, paste a URL, or type your text — get a natural two-host AI podcast conversation in seconds. Like NotebookLM, but free and no login.</p>
+      <p class="subtitle">Upload a PDF, paste a URL, or type your text — get a natural two-host AI podcast conversation in seconds. Like NotebookLM, but with a free 30-credit monthly tier.</p>
     </div>
   </section>
 
@@ -145,7 +186,7 @@
         <!-- Credits info -->
         <div class="credits-info">
           <p>✨ <strong>Free:</strong> 30 credits/month · <strong>Basic $4.99:</strong> 300 credits · <strong>Pro $9.99:</strong> 1,000 credits · 1 credit = 1 minute</p>
-          <p class="credit-count" id="credit-count">Free plan: <strong>30 credits remaining this month</strong></p>
+          <p class="credit-count" id="credit-count"><a href="#" id="credit-cta">Sign up free</a> to get <strong>30 credits/month</strong>. 1 credit = 1 minute of audio.</p>
         </div>
       </div>
     </div>
@@ -261,11 +302,11 @@
       <div class="faq-list">
         <details class="faq-item">
           <summary>Is this like Google NotebookLM?</summary>
-          <p>Yes! Similar to NotebookLM's Audio Overviews, but you don't need a Google account, and you can use any content — URLs, PDFs, or plain text. No login required for free tier.</p>
+          <p>Yes! Similar to NotebookLM's Audio Overviews, but you can use any content — URLs, PDFs, or plain text. Sign up free for 30 credits/month to start generating.</p>
         </details>
         <details class="faq-item">
           <summary>How many podcasts can I generate for free?</summary>
-          <p>Free plan gives you 30 credits per month (1 credit = 1 minute of generated audio). That's about 15 short podcasts or 3-4 full-length ones. Upgrade to Pro for 1,000 credits/month.</p>
+          <p>The free plan gives you 30 credits per month (1 credit = 1 minute of generated audio). That's about 15 short podcasts or 3-4 full-length ones. Upgrade to Pro for 1,000 credits/month.</p>
         </details>
         <details class="faq-item">
           <summary>What languages are supported?</summary>
@@ -288,7 +329,7 @@
       <div class="footer-grid">
         <div class="footer-col">
           <h4>Convert to Podcast</h4>
-          <p>Turn any content into an AI podcast conversation. Free to start.</p>
+          <p>Turn any content into an AI podcast conversation. Sign up free to start.</p>
         </div>
         <div class="footer-col">
           <h4>Tools</h4>
@@ -309,6 +350,7 @@
     </div>
   </footer>
 
+  <script src="/src/supabase-client.js"></script>
   <script src="/src/script.js"></script>
 </body>
 </html>
