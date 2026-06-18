@@ -307,10 +307,13 @@ Generate the podcast script in ${getLanguageName(language)}.`;
 // --- Audio Generation (ElevenLabs TTS + Supabase Storage) ---
 
 async function generateAudio(script, language, length, env) {
+  // DEBUG: check env vars immediately
+  let debugInfo = `env types: url=${typeof env.SUPABASE_URL} key=${typeof env.SUPABASE_SERVICE_KEY}`;
+
   const apiKey = env.ELEVENLABS_API_KEY;
   if (!apiKey) {
     return {
-      url: '', share_url: '',
+      url: '', share_url: '', upload_error: debugInfo + ' no apiKey',
       duration: length === 'short' ? 180 : length === 'long' ? 900 : 480,
     };
   }
@@ -390,7 +393,7 @@ async function generateAudio(script, language, length, env) {
   return {
     url: `data:${mimeType};base64,${base64}`,
     share_url: shareUrl,
-    upload_error: uploadError,
+    upload_error: uploadError || debugInfo,
     duration,
   };
 }
