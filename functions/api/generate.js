@@ -150,7 +150,7 @@ export async function onRequest(context) {
         uploadDebug = 'EXCEPTION: ' + e.message;
       }
     } else {
-      uploadDebug = 'no valid data URL (type=' + typeof dataUrl + ')';
+      uploadDebug = 'url=' + (typeof dataUrl === 'string' ? dataUrl.slice(0, 25) : typeof dataUrl);
     }
 
     // Calculate credits used (1 credit per minute of audio, min 1)
