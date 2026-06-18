@@ -260,11 +260,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!url || url.startsWith('data:')) {
         const err = result?.upload_error;
         if (err) {
-          shareBtn.textContent = '⚠️ ' + err.slice(0, 30);
+          shareBtn.textContent = '⚠️ ' + err.slice(0, 40);
         } else {
           shareBtn.textContent = '⚠️ No share link';
         }
-        setTimeout(() => { shareBtn.textContent = '📋 Copy Link'; }, 3000);
+        setTimeout(() => { shareBtn.textContent = '📋 Copy Link'; }, 4000);
         return;
       }
       await navigator.clipboard.writeText(url);
