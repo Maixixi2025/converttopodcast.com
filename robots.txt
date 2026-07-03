@@ -1,0 +1,9 @@
+# robots.txt for converttopodcast.com
+# Updated: 2026-07-03
+
+User-agent: *
+Allow: /
+Disallow: /account/
+Disallow: /src/
+
+Sitemap: https://converttopodcast.com/sitemap.xml
