@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy - ConvertToPodcast</title>
+  <meta name="description" content="How ConvertToPodcast handles your data: what we collect, how we use it, and your rights. Covers Supabase auth, content uploads, and audio generation logs.">
+  <link rel="canonical" href="https://converttopodcast.com/privacy/">
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <nav class="nav">
+    <div class="container">
+      <a href="/" class="logo">🎙️ ConvertToPodcast</a>
+      <div class="nav-links">
+        <a href="/tools/pdf-to-podcast/">PDF to Podcast</a>
+        <a href="/tools/article-to-podcast/">Article to Podcast</a>
+        <a href="/tools/url-to-podcast/">URL to Podcast</a>
+        <a href="/blog/">Blog</a>
+      </div>
+      <div class="nav-auth">
+        <span class="credit-pill" id="nav-credit-pill" style="display:none">⚡ <span id="nav-credit-num">30</span></span>
+        <button class="nav-btn nav-btn-primary" id="nav-signin">Sign in</button>
+        <button class="nav-btn nav-btn-account" id="nav-account" style="display:none">
+          <span id="nav-account-email"></span>
+          <span class="nav-account-caret">▾</span>
+        </button>
+        <div class="nav-account-menu" id="nav-account-menu" style="display:none">
+          <a href="/account/">📋 My History</a>
+          <a href="#" id="nav-upgrade">Upgrade plan</a>
+          <a href="#" id="nav-signout">Sign out</a>
+        </div>
+      </div>
+      <button class="hamburger" aria-label="Menu">☰</button>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="container">
+      <h1>Privacy Policy</h1>
+      <p class="subtitle">Last updated: July 3, 2026</p>
+    </div>
+  </section>
+
+  <section class="how-it-works" style="padding: 0 0 60px;">
+    <div class="container" style="max-width: 760px;">
+      <h2>What We Collect</h2>
+      <p style="text-align: left; color: var(--text-muted); line-height: 1.7;">
+        <strong>Account data:</strong> When you sign in (Google OAuth or email magic link via Supabase), we store your email address and a hashed authentication token. We never see or store your Google password.
+      </p>
+      <p style="text-align: left; color: var(--text-muted); line-height: 1.7;">
+        <strong>Content you submit:</strong> URLs, text, and PDFs you submit for podcast generation are processed in real time and stored in your personal generation history so you can re-listen or download later. You can delete any individual generation from <a href="/account/">your account</a>; deleted generations are removed from our database within 30 days.
+      </p>
+      <p style="text-align: left; color: var(--text-muted); line-height: 1.7;">
+        <strong>Generated audio:</strong> Podcast MP3s are stored on Cloudflare R2 and tied to your account. Free-tier audio is retained for 30 days; paid-tier audio is retained for 1 year.
+      </p>
+      <p style="text-align: left; color: var(--text-muted); line-height: 1.7;">
+        <strong>Usage logs:</strong> We log API calls, generation timestamps, and credit balance changes for billing and abuse prevention. We do not log the full text of your content in our application logs.
+      </p>
+
+      <h2 style="margin-top: 40px;">How We Use Your Data</h2>
+      <p style="text-align: left; color: var(--text-muted); line-height: 1.7;">
+        We use your data only to provide the service: run the AI generation pipeline, store your history, charge credits, and email you service-critical notifications (account changes, billing). We do not sell your data, we do not share it with advertisers, and we do not train third-party AI models on your content.
+      </p>
+
+      <h2 style="margin-top: 40px;">Third-Party Processors</h2>
+      <ul style="text-align: left; color: var(--text-muted); line-height: 1.7; padding-left: 20px;">
+        <li><strong>Supabase</strong> — authentication and database hosting (US East / EU West, depending on region).</li>
+        <li><strong>Cloudflare</strong> — static asset hosting, Workers (API), R2 (audio storage), and CDN.</li>
+        <li><strong>Stripe</strong> — payment processing. Card data goes directly to Stripe; we never see or store your card number.</li>
+        <li><strong>OpenAI / ElevenLabs / Cartesia</strong> — AI inference providers used to generate scripts and audio. Your submitted content is sent to these providers only for the purpose of generating your podcast and is not retained by them for training (per their respective API terms).</li>
+      </ul>
+
+      <h2 style="margin-top: 40px;">Your Rights</h2>
+      <p style="text-align: left; color: var(--text-muted); line-height: 1.7;">
+        You can request a full export of your data, or request account deletion, by emailing <a href="mailto:privacy@converttopodcast.com">privacy@converttopodcast.com</a>. We respond to data requests within 7 business days. Account deletion is permanent and removes your email, generation history, and stored audio within 30 days.
+      </p>
+
+      <h2 style="margin-top: 40px;">Cookies</h2>
+      <p style="text-align: left; color: var(--text-muted); line-height: 1.7;">
+        We use a single first-party session cookie for authentication (issued by Supabase). We do not use third-party tracking cookies or analytics scripts that follow you across sites.
+      </p>
+
+      <h2 style="margin-top: 40px;">Children's Privacy</h2>
+      <p style="text-align: left; color: var(--text-muted); line-height: 1.7;">
+        The service is not directed to children under 13. We do not knowingly collect data from children. If you believe a child has signed up, contact <a href="mailto:privacy@converttopodcast.com">privacy@converttopodcast.com</a> and we will delete the account.
+      </p>
+
+      <h2 style="margin-top: 40px;">Changes to This Policy</h2>
+      <p style="text-align: left; color: var(--text-muted); line-height: 1.7;">
+        We will post material changes on this page with an updated "Last updated" date and, for significant changes, email active users at least 14 days before the change takes effect.
+      </p>
+
+      <h2 style="margin-top: 40px;">Contact</h2>
+      <p style="text-align: left; color: var(--text-muted); line-height: 1.7;">
+        Questions about this policy? Email <a href="mailto:privacy@converttopodcast.com">privacy@converttopodcast.com</a>.
+      </p>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <h4>Convert to Podcast</h4>
+          <p>Turn any content into an AI podcast conversation. Sign up free to start.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Tools</h4>
+          <a href="/tools/pdf-to-podcast/">PDF to Podcast</a>
+          <a href="/tools/article-to-podcast/">Article to Podcast</a>
+          <a href="/tools/url-to-podcast/">URL to Podcast</a>
+          <a href="/tools/text-to-podcast/">Text to Podcast</a>
+          <a href="/tools/research-paper-to-podcast/">Research Paper to Podcast</a>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <a href="/privacy/">Privacy Policy</a>
+          <a href="/terms/">Terms of Service</a>
+          <a href="/contact/">Contact</a>
+        </div>
+      </div>
+      <p class="footer-bottom">&copy; 2026 ConvertToPodcast. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="/src/supabase-client.js?v=2"></script>
+  <script src="/src/script.js?v=2"></script>
+</body>
+</html>

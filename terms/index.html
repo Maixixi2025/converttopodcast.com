@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terms of Service - ConvertToPodcast</title>
+  <meta name="description" content="ConvertToPodcast terms of service. Covers acceptable use, account rules, billing, refunds, and content rights for generated podcasts.">
+  <link rel="canonical" href="https://converttopodcast.com/terms/">
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <nav class="nav">
+    <div class="container">
+      <a href="/" class="logo">🎙️ ConvertToPodcast</a>
+      <div class="nav-links">
+        <a href="/tools/pdf-to-podcast/">PDF to Podcast</a>
+        <a href="/tools/article-to-podcast/">Article to Podcast</a>
+        <a href="/tools/url-to-podcast/">URL to Podcast</a>
+        <a href="/blog/">Blog</a>
+      </div>
+      <div class="nav-auth">
+        <span class="credit-pill" id="nav-credit-pill" style="display:none">⚡ <span id="nav-credit-num">30</span></span>
+        <button class="nav-btn nav-btn-primary" id="nav-signin">Sign in</button>
+        <button class="nav-btn nav-btn-account" id="nav-account" style="display:none">
+          <span id="nav-account-email"></span>
+          <span class="nav-account-caret">▾</span>
+        </button>
+        <div class="nav-account-menu" id="nav-account-menu" style="display:none">
+          <a href="/account/">📋 My History</a>
+          <a href="#" id="nav-upgrade">Upgrade plan</a>
+          <a href="#" id="nav-signout">Sign out</a>
+        </div>
+      </div>
+      <button class="hamburger" aria-label="Menu">☰</button>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="container">
+      <h1>Terms of Service</h1>
+      <p class="subtitle">Last updated: July 3, 2026</p>
+    </div>
+  </section>
+
+  <section class="how-it-works" style="padding: 0 0 60px;">
+    <div class="container" style="max-width: 760px;">
+      <h2>1. The Service</h2>
+      <p style="text-align: left; color: var(--text-muted); line-height: 1.7;">
+        ConvertToPodcast ("the Service") converts text, URLs, and PDF documents into AI-generated two-host podcast audio. By creating an account or using the Service, you agree to these terms.
+      </p>
+
+      <h2 style="margin-top: 40px;">2. Accounts</h2>
+      <p style="text-align: left; color: var(--text-muted); line-height: 1.7;">
+        You are responsible for keeping your account credentials secure and for activity that happens under your account. You must be at least 13 years old to use the Service. One account per person; we reserve the right to merge or close duplicate accounts.
+      </p>
+
+      <h2 style="margin-top: 40px;">3. Acceptable Use</h2>
+      <p style="text-align: left; color: var(--text-muted); line-height: 1.7;">You agree not to submit content that:</p>
+      <ul style="text-align: left; color: var(--text-muted); line-height: 1.7; padding-left: 20px;">
+        <li>Infringes any third party's copyright, trademark, or other intellectual property rights.</li>
+        <li>Is unlawful, harassing, defamatory, or fraudulent.</li>
+        <li>Contains malware, phishing payloads, or attempts to extract data from our systems.</li>
+        <li>Is content you do not have the right to use, including paid news articles behind paywalls, leaked documents, or confidential business information.</li>
+      </ul>
+      <p style="text-align: left; color: var(--text-muted); line-height: 1.7;">
+        We may suspend or terminate accounts that violate these rules. Repeated abuse may result in permanent ban without refund.
+      </p>
+
+      <h2 style="margin-top: 40px;">4. Plans and Credits</h2>
+      <p style="text-align: left; color: var(--text-muted); line-height: 1.7;">
+        The Service is sold on a credit-based model. <strong>1 credit = 1 minute of generated audio.</strong> The free plan includes 30 credits per month and does not roll over. Paid plans (Basic, Pro, Ultra) include larger monthly credit allowances; paid credits also do not roll over unless explicitly stated.
+      </p>
+      <p style="text-align: left; color: var(--text-muted); line-height: 1.7;">
+        A generation is only charged against your credit balance when the pipeline produces a complete audio file. If a generation fails for reasons on our end (server error, upstream AI provider outage), no credits are deducted.
+      </p>
+
+      <h2 style="margin-top: 40px;">5. Billing and Refunds</h2>
+      <p style="text-align: left; color: var(--text-muted); line-height: 1.7;">
+        Paid subscriptions are billed monthly via Stripe. You can cancel anytime from your account settings; cancellation takes effect at the end of the current billing cycle. We do not offer refunds for partial months or unused credits, except in cases of confirmed billing errors.
+      </p>
+
+      <h2 style="margin-top: 40px;">6. Your Content and Generated Audio</h2>
+      <p style="text-align: left; color: var(--text-muted); line-height: 1.7;">
+        <strong>You own your inputs.</strong> You retain all rights to the content you submit.
+      </p>
+      <p style="text-align: left; color: var(--text-muted); line-height: 1.7;">
+        <strong>You own your outputs.</strong> On paid plans, generated podcast audio comes with full commercial rights — you can publish, monetize, or distribute it. On the free plan, generated audio is licensed for personal, non-commercial use only.
+      </p>
+      <p style="text-align: left; color: var(--text-muted); line-height: 1.7;">
+        <strong>You give us a limited license to process your content</strong> solely to operate the Service (run the AI pipeline, store your history, deliver the audio). This license terminates when you delete the content or close your account.
+      </p>
+
+      <h2 style="margin-top: 40px;">7. Service Availability</h2>
+      <p style="text-align: left; color: var(--text-muted); line-height: 1.7;">
+        We aim for high availability but do not guarantee uninterrupted service. Upstream AI providers (OpenAI, ElevenLabs, Cartesia) and infrastructure providers (Cloudflare, Stripe) can have outages. We are not liable for losses caused by service downtime.
+      </p>
+
+      <h2 style="margin-top: 40px;">8. Disclaimer of Warranties</h2>
+      <p style="text-align: left; color: var(--text-muted); line-height: 1.7;">
+        The Service is provided "as is." We do not warrant that generated audio will be accurate, free of errors, or suitable for any particular purpose. AI-generated content can contain factual mistakes; verify before publishing on sensitive topics.
+      </p>
+
+      <h2 style="margin-top: 40px;">9. Limitation of Liability</h2>
+      <p style="text-align: left; color: var(--text-muted); line-height: 1.7;">
+        To the maximum extent permitted by law, our total liability for any claim arising from your use of the Service is limited to the amount you paid us in the 12 months preceding the claim, or USD $100, whichever is greater.
+      </p>
+
+      <h2 style="margin-top: 40px;">10. Changes to These Terms</h2>
+      <p style="text-align: left; color: var(--text-muted); line-height: 1.7;">
+        We may update these terms. For material changes, we will email active users at least 14 days before the change takes effect. Continued use after the effective date constitutes acceptance.
+      </p>
+
+      <h2 style="margin-top: 40px;">11. Contact</h2>
+      <p style="text-align: left; color: var(--text-muted); line-height: 1.7;">
+        Questions about these terms? Email <a href="mailto:legal@converttopodcast.com">legal@converttopodcast.com</a>.
+      </p>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <h4>Convert to Podcast</h4>
+          <p>Turn any content into an AI podcast conversation. Sign up free to start.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Tools</h4>
+          <a href="/tools/pdf-to-podcast/">PDF to Podcast</a>
+          <a href="/tools/article-to-podcast/">Article to Podcast</a>
+          <a href="/tools/url-to-podcast/">URL to Podcast</a>
+          <a href="/tools/text-to-podcast/">Text to Podcast</a>
+          <a href="/tools/research-paper-to-podcast/">Research Paper to Podcast</a>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <a href="/privacy/">Privacy Policy</a>
+          <a href="/terms/">Terms of Service</a>
+          <a href="/contact/">Contact</a>
+        </div>
+      </div>
+      <p class="footer-bottom">&copy; 2026 ConvertToPodcast. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="/src/supabase-client.js?v=2"></script>
+  <script src="/src/script.js?v=2"></script>
+</body>
+</html>
